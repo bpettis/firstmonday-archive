@@ -33,9 +33,16 @@ def request_with_retry(url, retries=3, backoff_factor=1):
     return None
 
 def setup_csv():
-    with open(ARTICLES_OUTPUT_FILE, "w") as f:
-        f.write("title,authors,keywords,publication_date,abstract,url,pdf_url,doi,status\n")
-        
+    
+    # Check if the CSV files already exist, if not, create them and write the headers
+    if os.path.exists(ARTICLES_OUTPUT_FILE) and os.path.exists(ISSUES_OUTPUT_FILE):
+        pass
+    else:
+        with open(ARTICLES_OUTPUT_FILE, "w") as f:
+            f.write("title,authors,keywords,publication_date,abstract,url,pdf_url,doi,status\n")
+    
+    if os.path.exists(ISSUES_OUTPUT_FILE):
+        return
     with open(ISSUES_OUTPUT_FILE, "w") as f:
         f.write("volume,number,publication_date,url, articles, status\n")
 
@@ -59,11 +66,14 @@ def save_article(article_url):
         authors_list.append({"name": name, "affiliation": affiliation})
     publication_date = soup.select_one("div.item.published span").text.strip() if soup.select_one("div.item.published span") else "N/A"
     abstract = soup.select_one("div.item.abstract").text.strip() if soup.select_one("div.item.abstract") else "N/A"
-    doi = soup.select_one("div.item.doi a").text.strip() if soup.select_one("div.item.doi a") else "N/A"
+    doi = soup.select_one("section.item.doi a").text.strip() if soup.select_one("section.item.doi a") else "N/A"
+    print(doi)
     try:
-        keywords = soup.find("div", class_=["item", "keywords"]).find("span").text.strip() if soup.find("div", class_=["item", "keywords"]) else "N/A"
+        keywords = soup.select_one("section.item.keywords span.value").text.strip() if soup.select_one("section.item.keywords span.value") else "N/A"
     except AttributeError:
         keywords = "N/A"
+    # strip tabs and spaces from keywords
+    keywords = re.sub(r"\s+", " ", keywords)
     pdf_link = soup.select_one("a.obj_galley_link.pdf")["href"] if soup.select_one("a.obj_galley_link.pdf") else "N/A"
     
     # Try to download a copy of the PDF file
@@ -122,6 +132,14 @@ def scrape_issue(issue_url):
     print(f"Found {count} articles in issue")
     
     for article in articles:
+        
+        # Check if article is already in the CSV file by matching the URL:
+        # TO-DO: check if the status is "failed" and if so, try to scrape it again instead of skipping it
+        with open(ARTICLES_OUTPUT_FILE, "r") as f:
+            if article.find("h3", class_="title").find("a")["href"] in f.read():
+                print(f"Article already exists in CSV, skipping: {article.find('h3', class_='title').text.strip()}")
+                continue
+        
         url = article.find("h3", class_="title").find("a")["href"]
         title = article.find("h3", class_="title").text.strip()
         print(f"Scraping article: {title} - {url}")
