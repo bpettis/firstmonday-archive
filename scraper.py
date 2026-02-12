@@ -67,10 +67,28 @@ def save_article(article_url):
     pdf_link = soup.select_one("a.obj_galley_link.pdf")["href"] if soup.select_one("a.obj_galley_link.pdf") else "N/A"
     
     # Try to download a copy of the PDF file
+
+    
+    
     try:
         if pdf_link != "N/A":
             pdf_response = request_with_retry(pdf_link)
             if pdf_response is not None:
+                
+                    # FM has a funky JS viewer that loads the PDF but with some extra stuff.
+                    # The *actual* PDF URL is going to be something like: https://firstmonday.org/ojs/index.php/fm/article/download/14442/12149/93487
+                    # The URL that I get through beautifulsoup looks like: https://firstmonday.org/ojs/index.php/fm/article/view/14442/12149
+                    
+                    # I think we have to get this correct URL from the "Download" link on the new "viewer" page
+                    
+                viewer_soup = BeautifulSoup(pdf_response.text, "html.parser")
+                download_link = viewer_soup.find("a", class_="download")["href"] if viewer_soup.find("a", class_="download") else None
+                
+                if download_link:
+                    pdf_response = request_with_retry(download_link)
+                else:
+                    raise Exception("Download link not found on viewer page")
+                
                 pdf_filename = f"{doi.replace('/', '_')}.pdf" if doi != "N/A" else f"{article_title[:50].replace(' ', '_')}.pdf"
                 
                 # Need to make sure the "pdfs" directory exists before trying to save files there
