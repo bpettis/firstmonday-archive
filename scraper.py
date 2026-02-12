@@ -132,6 +132,12 @@ def save_article(article_url):
             file_download_link = html_link
             local_file = f"{doi.replace('/', '_')}.html" if doi != "N/A" else f"{article_title[:50].replace(' ', '_')}.html"
             local_file = re.sub(r'[\\/*?:"<>|]', "", local_file)
+            
+            # HTML link on the article page looks like: https://firstmonday.org/ojs/index.php/fm/article/view/10306/9585
+            # But we need to actually load: https://firstmonday.org/ojs/index.php/fm/article/download/10306/9585?inline=1
+            
+            html_link = html_link.replace("/view/", "/download/") + "?inline=1"
+            
             html_response = request_with_retry(html_link)
             if html_response is not None:
                 with open(os.path.join("pdfs", local_file), "w", encoding="utf-8") as f:
