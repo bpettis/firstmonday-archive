@@ -7,3 +7,32 @@ After 30 years of publication, the open access peer reviewed journal _First Mond
 I am working on a simple project to mirror all publications from _First Monday_ to ensure that this rich collection of scholarship is not lost.
 
 For questions or more info, contact me at [ben.pettis@richmond.edu](ben.pettis@richmond.edu)
+
+## Basic Usage
+
+1. Install required packages
+
+```
+pip3 install -r requirements.txt
+```
+
+2. Run the `scraper.py` script
+
+```
+python3 scraper.py
+```
+
+This will create two files, `articles.csv` and `issues.csv` which contains metadata for all articles and issues.
+A separate folder `pdfs` will be created which contains the PDF for each article. 
+
+## Future Steps
+
+- Upload PDF files (along with metadata) to Internet Archive for wider access
+- Recreate search funcationality on a new website (or possibly integrate with Internet Archive?)
+
+
+## Other Notes
+
+Work published in _First Monday_ is published under a permissive Creative Commons License (Attribution-NonCommercial-ShareAlike 4.0 International License)
+Authors retain copyright to their work published in _First Monday_. Please see the footer of each article for details.
+
