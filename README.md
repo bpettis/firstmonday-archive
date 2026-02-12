@@ -8,6 +8,8 @@ I am working on a simple project to mirror all publications from _First Monday_ 
 
 For questions or more info, contact me at [ben.pettis@richmond.edu](ben.pettis@richmond.edu)
 
+The `articles.csv` and `issues.csv` files in the repository contain all scraped metadata from the journal website as of February 12, 2026. Article PDFs (or HTML files) are not included at this time, as they remain available at https://firstmonday.org for now. 
+
 ## Basic Usage
 
 1. Install required packages
