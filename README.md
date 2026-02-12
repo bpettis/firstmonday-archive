@@ -25,6 +25,10 @@ python3 scraper.py
 This will create two files, `articles.csv` and `issues.csv` which contains metadata for all articles and issues.
 A separate folder `pdfs` will be created which contains the PDF for each article. 
 
+## Known Issues
+
+- Downloads PDFs, but for articles that only include HTML (Which is a _lot_ of stuff pre-2018ish), the article is not yet downloaded at this point (information is still saved to the CSV so we can go back and get them later)
+
 ## Future Steps
 
 - Upload PDF files (along with metadata) to Internet Archive for wider access
