@@ -79,7 +79,7 @@ def save_article(article_url):
     # Try to download a copy of the PDF file
 
     
-    
+    pdf_filename = ''
     try:
         if pdf_link != "N/A":
             pdf_response = request_with_retry(pdf_link)
@@ -115,6 +115,11 @@ def save_article(article_url):
             f.write(f'"{article_title}","{json.dumps(authors_list)}","{keywords}","{publication_date}","{abstract}","{article_url}","N/A","{doi}","{pdf_filename}", "pdf_download_failed"\n')
         return
 
+    # handle cases where there *isn't* a PDF link by writing "N/A" in the pdf_url and pdf_filename fields in the CSV file, but still writing the article metadata
+    # TO-DO: make sure that we come back and save copies of the HTML 
+    if pdf_link == "N/A":
+        pdf_link = "N/A"
+        pdf_filename = "N/A"
     
     # Write this all into the CSV file
     with open(ARTICLES_OUTPUT_FILE, "a") as f:
