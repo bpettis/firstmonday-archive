@@ -39,7 +39,7 @@ def setup_csv():
         pass
     else:
         with open(ARTICLES_OUTPUT_FILE, "w") as f:
-            f.write("title,authors,keywords,publication_date,abstract,url,pdf_url,doi,pdf_filename,status\n")
+            f.write("title,authors,keywords,publication_date,abstract,url,download_url,doi,local_filename,status\n")
     
     if os.path.exists(ISSUES_OUTPUT_FILE):
         return
@@ -121,9 +121,28 @@ def save_article(article_url):
         pdf_link = "N/A"
         pdf_filename = "N/A"
     
+        
+    if pdf_link != "N/A":
+        file_download_link = pdf_link
+        local_file = pdf_filename
+    else:
+        # No PDF available, try to get the HTML version
+        html_link = soup.select_one("a.obj_galley_link.file")["href"] if soup.select_one("a.obj_galley_link.file") else "N/A"
+        if html_link != "N/A":
+            file_download_link = html_link
+            local_file = f"{doi.replace('/', '_')}.html" if doi != "N/A" else f"{article_title[:50].replace(' ', '_')}.html"
+            local_file = re.sub(r'[\\/*?:"<>|]', "", local_file)
+            html_response = request_with_retry(html_link)
+            if html_response is not None:
+                with open(os.path.join("pdfs", local_file), "w", encoding="utf-8") as f:
+                    f.write(html_response.text)
+        else:
+            file_download_link = "N/A"
+            local_file = "N/A"
+    
     # Write this all into the CSV file
     with open(ARTICLES_OUTPUT_FILE, "a") as f:
-        f.write(f'"{article_title}","{json.dumps(authors_list)}","{keywords}","{publication_date}","{abstract}","{article_url}","{pdf_link}","{doi}","{pdf_filename}", "success"\n')
+        f.write(f'"{article_title}","{json.dumps(authors_list)}","{keywords}","{publication_date}","{abstract}","{article_url}","{file_download_link}","{doi}","{local_file}", "success"\n')
 
 def scrape_issue(issue_url):
     response = requests.get(issue_url, headers={"User-Agent": "Mozilla/5.0"})
