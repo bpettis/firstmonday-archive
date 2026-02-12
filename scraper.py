@@ -77,6 +77,7 @@ def save_article(article_url):
                 os.makedirs("pdfs", exist_ok=True)
                 
                 # Need to sanitize the filename because there's a very real chance that the titles will have special characters in them
+                pdf_filename = re.sub(r'[\\/*?:"<>|]', "", pdf_filename)
                 
                 with open(os.path.join("pdfs", pdf_filename), "wb") as f:
                     f.write(pdf_response.content)
